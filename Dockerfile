@@ -1,1 +1,1 @@
-FROM hirefire/logdrain.proxy:1.0.0
+FROM hirefire/logdrain.proxy:1.0.1
