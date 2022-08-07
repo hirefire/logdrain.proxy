@@ -186,14 +186,14 @@ version number in the Dockerfile:
 
 ```diff
 # Dockerfile
-- FROM hirefire/logdrain.proxy:1.0.2
-+ FROM hirefire/logdrain.proxy:1.0.3
+- FROM hirefire/logdrain.proxy:1.0.3
++ FROM hirefire/logdrain.proxy:1.0.4
 ```
 
 Then commit that change and push it to Heroku:
 
 ``` sh
-git commit -am "Upgrade to version 1.0.3"
+git commit -am "Upgrade to version 1.0.4"
 git push heroku master
 ```
 
