@@ -1,17 +1,10 @@
 ## HireFire Logdrain Proxy
 
-HireFire Logdrain Proxy ("Proxy") is a service for [HireFire] that intercepts
-log data from the Heroku Logplex ("Logplex") and filters out all of the
-irrelevant lines, and only proxies the relevant ones to the HireFire Logdrain
-("Logdrain").
+HireFire Logdrain Proxy (referred to as "Proxy") is a service for [HireFire] that intercepts log data from Heroku Logplex ("Logplex") and filters out irrelevant lines, proxying only the relevant ones to the HireFire Logdrain ("Logdrain").
 
-The goal of the Proxy is to improve the privacy/security of our customers by
-allowing them to host the service on their own Heroku account. With the Proxy in
-place the Logdrain only receives log data it actually needs to perform scaling
-operations. All irrelevant log lines are discarded at the Proxy, never leaving
-your Heroku account.
+The goal of the Proxy is to enhance the privacy and security of customers by allowing them to host the service on their own Heroku account. With the Proxy in place, the Logdrain receives only the necessary log data for scaling operations, while all other log lines are discarded within your Heroku account.
 
-Rather than using the default setup:
+Instead of using the default setup:
 
 ```text
 +---------------------------+            +--------------------------+
@@ -27,7 +20,7 @@ Rather than using the default setup:
 +---------------------------+            +--------------------------+
 ```
 
-Instead, your setup will look like this:
+Your setup will look like this:
 
 ```text
 +-------------------------------------------------------+          +-------------------------+
@@ -46,31 +39,25 @@ Instead, your setup will look like this:
 
 ### System Requirements
 
-The Proxy can easily be hosted on Heroku's Hobby or Standard-1X [plans]. Both
-plans come with 512mb of memory and 8 cpu cores.
+The Proxy can easily be hosted on Heroku's Hobby or Standard-1X [plans]. Both plans provide 512 MB of memory and 8 CPU cores.
 
-Applications with moderate log volume will require only around 20mb (4%) of
-memory, and all 8 cpu cores on the dynos will be utilized. The Proxy is
-optimized for parallelism and concurrency.
+Applications with moderate log volume should require only around 20 MB (approximately 4%) of memory, and all 8 CPU cores on the dynos will be utilized. The Proxy is optimized for parallelism and concurrency.
 
 
 ### Multiple Applications
 
-You don't need to deploy one Proxy per application. Instead, multiple
-applications can use the same Proxy without any additional configuration.
+There is no need to deploy one Proxy for each application. Multiple applications can share the same Proxy without any additional configuration.
 
 
 ### Scalability
 
-In the event that you do have an exceptionally large amount of logs, coming from
-either one- or multiple applications combined, you'll be able to scale the Proxy
-horizontally:
+In the event of an exceptionally large volume of logs, whether from one or multiple applications, you can scale the Proxy horizontally:
 
-``` sh
+```sh
 heroku ps:scale web=2
 ```
 
-Or vertically:
+Vertically:
 
 ```sh
 heroku ps:resize web=standard-2x
@@ -78,16 +65,14 @@ heroku ps:resize web=standard-2x
 
 Or both:
 
-``` sh
+```sh
 heroku ps:scale web=2:standard-2x
 ```
 
 
 ### Setup
 
-The Proxy is distributed as a Heroku-deployable Docker image. Once deployed
-you'll have to hook up the Logplex to the Proxy. The Proxy is automatically
-hooked up to the Logdrain.
+The Proxy is distributed as a Heroku-deployable Docker image. Once deployed, you will need to connect Logplex to the Proxy. The Proxy is automatically connected to the Logdrain.
 
 
 #### Deployment
@@ -99,116 +84,103 @@ git clone https://github.com/hirefire/logdrain.proxy.git hirefire.logdrain.proxy
 cd hirefire.logdrain.proxy
 ```
 
-Since you'll be deploying a Docker image, we'll use the Container stack rather
-than the Heroku stack. Replace `[COMPANY]` with whatever name you like.
+As you'll be deploying a Docker image, use the Container stack instead of the Heroku stack. Replace `[COMPANY]` with your preferred name.
 
-``` sh
+```sh
 heroku create [COMPANY]-hfld-proxy --stack container
 ```
 
-Now deploy the application to Heroku.
+Now, deploy the application to Heroku.
 
-``` sh
+```sh
 git push heroku master
 ```
 
-Enable verbose logging so you can see exactly which log lines are being proxied
-and ignored/discarded.
+Enable verbose logging to monitor which log lines are being proxied or ignored/discarded.
 
-``` sh
+```sh
 heroku config:set VERBOSE=1
 ```
 
-You can disable verbose logging again later by removing the environment variable
-(`heroku config:unset VERBOSE`).
+You can disable verbose logging later by removing the environment variable (`heroku config:unset VERBOSE`).
 
-By default, Heroku spins up a Free-tier dyno which might not be able to run
-24/7. Upgrade to at least the Hobby-tier ($7/mo). This should be sufficient for
-most applications.
+By default, Heroku uses a Free-tier dyno which might not be able to run 24/7. Consider upgrading to at least the Hobby-tier ($7/mo), which should be sufficient for most applications.
 
-``` sh
+```sh
 heroku ps:resize web=hobby
 ```
 
-Now create a new drain and hook it up to the Proxy.
+Now create a new drain and connect it to the Proxy.
 
-``` sh
+```sh
 heroku drains:add https://[COMPANY]-hfld-proxy.herokuapp.com -a YOUR_APPLICATION
 ```
 
-If your application is actively emitting logs, check the logs of the Proxy and
-you should see `ignored`/`proxied` entries being logged. The `ignored` entries
-are the lines that are discarded at the Proxy, and `proxied` are the lines that
-have been successfully proxied to the Logdrain.
+If your application is actively generating logs, check the logs of the Proxy to see `ignored`/`proxied` entries. The `ignored` entries are discarded by the Proxy, while `proxied` entries are successfully sent to the Logdrain.
 
-``` sh
+```sh
 heroku logs -t --ps web
 ```
 
-The final step is to copy/paste the drain token
-(`d.********-****-****-****-************`) into the HireFire UI at the
-application level.
+Finally, copy and paste the drain token (`d.********-****-****-****-************`) into the HireFire UI at the application level.
 
 ```sh
 heroku drains -a YOUR_APPLICATION
 ```
 
-Navigate to the following URL to add the above-mentioned drain token:
+Navigate to the following URL to add the drain token:
 
-``` text
-https://manager.hirefire.io/applications/[APPLICATION_ID]/update
+```text
+https://manager.hirefire.io/applications/[APPLICATION_ID]/edit
 ```
 
 
 #### Previous Logdrain Setup
 
-If you've previously setup the Logdrain without the Proxy, don't forget to
-remove that old drain.
+If you previously set up the Logdrain without the Proxy, remember to remove the old drain.
 
-First acquire the list of all of your current drains:
+First, obtain the list of all your current drains:
 
-``` sh
+```sh
 heroku drains -a YOUR_APPLICATION
 ```
 
-Find the one (if it exists) that points to https://logdrain.hirefire.io, copy
-the drain token (`d.********-****-****-****-************`) and remove it:
+Find the one that points to https://logdrain.hirefire.io, copy the drain token (`d.********-****-****-****-************`), and remove it:
 
-``` sh
+```sh
 heroku drains:remove [OLD_DRAIN_TOKEN] -a YOUR_APPLICATION
 ```
 
 
 #### Upgrades
 
-It's recommended to run the latest version of the Proxy. To upgrade, update the
-version number in the Dockerfile:
+It's recommended to use the latest version of the Proxy. To upgrade, update the version number in the Dockerfile:
 
 ```diff
 # Dockerfile
-- FROM hirefire/logdrain.proxy:1.0.3
-+ FROM hirefire/logdrain.proxy:1.0.4
+- FROM hirefire/logdrain.proxy:1.0.4
++ FROM hirefire/logdrain.proxy:1.0.5
 ```
 
-Then commit that change and push it to Heroku:
+Then commit the change and push it to Heroku:
 
-``` sh
-git commit -am "Upgrade to version 1.0.4"
+```sh
+git commit -am "Upgrade to version 1.0.5"
 git push heroku master
 ```
 
-The Docker image repository can be found at:
+You can find the Docker image repository here:
 
 https://hub.docker.com/r/hirefire/logdrain.proxy
 
-All of the available versions are listed here:
+All available versions are listed here:
 
 https://hub.docker.com/r/hirefire/logdrain.proxy/tags
 
 
 ### License
 
-This source code is released under the Apache 2.0 license. See LICENSE.
+This source code is released under the Apache 2.0 license. See LICENSE file for details.
 
 [HireFire]: https://www.hirefire.io
 [plans]: https://www.heroku.com/pricing
