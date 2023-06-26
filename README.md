@@ -158,14 +158,14 @@ It's recommended to use the latest version of the Proxy. To upgrade, update the 
 
 ```diff
 # Dockerfile
-- FROM hirefire/logdrain.proxy:1.0.4
-+ FROM hirefire/logdrain.proxy:1.0.5
+- FROM hirefire/logdrain.proxy:1.0.5
++ FROM hirefire/logdrain.proxy:1.0.6
 ```
 
 Then commit the change and push it to Heroku:
 
 ```sh
-git commit -am "Upgrade to version 1.0.5"
+git commit -am "Upgrade to version 1.0.6"
 git push heroku master
 ```
 
