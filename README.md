@@ -39,7 +39,7 @@ Your setup will look like this:
 
 ### System Requirements
 
-The Proxy can easily be hosted on Heroku's Hobby or Standard-1X [plans]. Both plans provide 512 MB of memory and 8 CPU cores.
+The Proxy can easily be hosted on Heroku's Basic or Standard-1X [plans]. Both plans provide 512 MB of memory.
 
 Applications with moderate log volume should require only around 20 MB (approximately 4%) of memory, and all 8 CPU cores on the dynos will be utilized. The Proxy is optimized for parallelism and concurrency.
 
@@ -104,16 +104,22 @@ heroku config:set VERBOSE=1
 
 You can disable verbose logging later by removing the environment variable (`heroku config:unset VERBOSE`).
 
-By default, Heroku uses a Free-tier dyno which might not be able to run 24/7. Consider upgrading to at least the Hobby-tier ($7/mo), which should be sufficient for most applications.
+By default, Heroku uses an Eco dyno which sleeps after 30 minutes of inactivity. Consider upgrading to at least the Basic plan ($7/mo), which runs 24/7 and should be sufficient for most applications.
 
 ```sh
-heroku ps:resize web=hobby
+heroku ps:resize web=basic
 ```
 
-Now create a new drain and connect it to the Proxy.
+Now look up the Proxy's web URL and create a new drain pointing to it.
 
 ```sh
-heroku drains:add https://[COMPANY]-hfld-proxy.herokuapp.com -a YOUR_APPLICATION
+heroku apps:info
+```
+
+Copy the **Web URL** from the output and use it to add a drain.
+
+```sh
+heroku drains:add https://YOUR_PROXY_WEB_URL -a YOUR_APPLICATION
 ```
 
 If your application is actively generating logs, check the logs of the Proxy to see `ignored`/`proxied` entries. The `ignored` entries are discarded by the Proxy, while `proxied` entries are successfully sent to the Logdrain.
