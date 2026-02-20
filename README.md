@@ -160,28 +160,12 @@ heroku drains:remove [OLD_DRAIN_TOKEN] -a YOUR_APPLICATION
 
 #### Upgrades
 
-It's recommended to use the latest version of the Proxy. To upgrade, update the version number in the Dockerfile:
-
-```diff
-# Dockerfile
-- FROM hirefire/logdrain.proxy:1.0.6
-+ FROM hirefire/logdrain.proxy:1.1.0
-```
-
-Then commit the change and push it to Heroku:
+To upgrade to the latest version of the Proxy, pull the latest changes and push to Heroku:
 
 ```sh
-git commit -am "Upgrade to version 1.1.0"
+git pull
 git push heroku master
 ```
-
-You can find the Docker image repository here:
-
-https://hub.docker.com/r/hirefire/logdrain.proxy
-
-All available versions are listed here:
-
-https://hub.docker.com/r/hirefire/logdrain.proxy/tags
 
 
 ### License
